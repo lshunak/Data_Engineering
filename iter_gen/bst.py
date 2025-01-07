@@ -102,6 +102,7 @@ class BST:
     
     def __iter__(self):
         yield from self.inorder()
+        
 def main():
     # Create a new BST
     bst = BST()
