@@ -20,17 +20,23 @@ def printTree(root, prefix="", is_left=True):
     if not root:
         return
 
-    # Build the visual representation
     print(prefix + ("└── " if is_left else "├── ") + str(root.value))
     
-    # Prepare prefix for children
     new_prefix = prefix + ("    " if is_left else "│   ")
     
-    # Print right first (will appear at top)
     if root.right:
         printTree(root.right, new_prefix, False)
     if root.left:
         printTree(root.left, new_prefix, True)
+
+def print2DTree(root, space=0, LEVEL_SPACE = 5):
+    if (root == None): return
+    space += LEVEL_SPACE
+    print2DTree(root.right, space)
+    #print() # neighbor space
+    for i in range(LEVEL_SPACE, space): print(end = " ")  
+    print("|" + str(root.value) + "|<")
+    print2DTree(root.left, space)
 
 if __name__ == "__main__":
     root = TreeNode(0)
@@ -42,10 +48,9 @@ if __name__ == "__main__":
     root.right.left.right = TreeNode(0)
 
     print("Original Tree:")
-    printTree(root)  
+    print2DTree(root)  
 
-    # Prune the tree
     pruned_root = pruneTree(root)
 
     print("\nPruned Tree:")
-    printTree(pruned_root) 
+    print2DTree(pruned_root) 
