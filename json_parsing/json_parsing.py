@@ -75,7 +75,7 @@ def parse_array(tokens: Generator[Token, None, None])->list:
         if token.category == "RBRACKET":
             return result_array
         elif token.category == "COMMA":
-            continue  # Skip commas
+            continue 
         else:
             result_array.append(parse_value(chain([token], tokens)))  # Chain current token and remaining tokens
 
@@ -101,11 +101,10 @@ def parse_object(tokens: Generator[Token, None, None])->dict:
         
 
 def parse_json(s: str)->dict:
+
     token_gen = Lexer(s)
-    # Let parse_value handle top-level dispatch
     root = parse_value(token_gen)
     
-    # Check that we've consumed all tokens
     leftover = next(token_gen, None)
     if leftover is not None:
         raise SyntaxError("Extra data after valid JSON.")
@@ -116,9 +115,10 @@ if __name__ == "__main__":
     input_str = '{"hello" : 3.2 , "world": true}'
     input_str2 = '{"hello" : 3.2 , "world": true, "nested": {"key": "value", "key2": 3.4}}'
     input_str3 = '{"array": [1, 2, 3, 4]}'
-    input_str4 = '{"array": [1, 2, 3, 4], "nested": {"key": "value", "key2": 3.4}}'
-    input_str5 = '{"array": [1, 2, 3, 4], "nested": {"key": "'
+    input_str4 = '{"array": [{"key1": "val1"}, 2, 3, 4], "nested": {"key": "value", "key2": 3.4}}'
 
+    input_str5 = '{"array": [1, 2, 3, 4], "nested": {"key": "'
+    
     parsed_data = parse_json(input_str)
     print(parsed_data)  
     print(parse_json(input_str2))
