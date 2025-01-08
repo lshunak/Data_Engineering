@@ -7,6 +7,7 @@ class Scheduler:
         self.tasks = PriorityQueue()
     
     def add(self, time_point: float, coroutine: Iterator[None], frequency: Optional[float] = None) -> None:
+        
         if not hasattr(coroutine, '__next__'):
             raise TypeError("task must be a coroutine")      
        
@@ -16,9 +17,7 @@ class Scheduler:
                 if isinstance(interval, (int, float)):
                     next_time = time() + interval
                     self.tasks.push(next_time, (task_wrapper, None))
-                elif frequency is not None:
-                    next_time = time() + frequency
-                    self.tasks.push(next_time, (task_wrapper, frequency))
+                
                 return True
             except StopIteration:
                 print("Coroutine task completed")
@@ -39,13 +38,8 @@ class Scheduler:
 
             try:
                 print(f"Executing task scheduled at {time_point}")
-                should_continue = task()
-                
-                if should_continue and frequency is not None:
-                    next_time = time() + frequency
-                    # Don't create new wrapper, reuse existing task
-                    self.tasks.push(next_time, (task, frequency))
-                    
+                task()
+
             except Exception as e:
                 print(f"An error occurred: {e}")
             
