@@ -8,13 +8,17 @@ class Scheduler:
     
     def add(self, time_point: float, coroutine: Iterator[None], frequency: Optional[float] = None) -> None:
         if not hasattr(coroutine, '__next__'):
-            raise TypeError("task must be a coroutine")
-        
-        original_coroutine = coroutine
-        
+            raise TypeError("task must be a coroutine")      
+       
         def task_wrapper() -> bool:
             try:
-                next(original_coroutine)
+                interval = next(coroutine)
+                if isinstance(interval, (int, float)):
+                    next_time = time() + interval
+                    self.tasks.push(next_time, (task_wrapper, None))
+                elif frequency is not None:
+                    next_time = time() + frequency
+                    self.tasks.push(next_time, (task_wrapper, frequency))
                 return True
             except StopIteration:
                 print("Coroutine task completed")
@@ -23,7 +27,6 @@ class Scheduler:
                 print(f"An error occurred: {e}")
                 return False
 
-        # Push wrapper with original coroutine
         self.tasks.push(time_point, (task_wrapper, frequency))
 
     def run(self) -> None:
@@ -40,6 +43,7 @@ class Scheduler:
                 
                 if should_continue and frequency is not None:
                     next_time = time() + frequency
+                    # Don't create new wrapper, reuse existing task
                     self.tasks.push(next_time, (task, frequency))
                     
             except Exception as e:
@@ -91,9 +95,32 @@ def test_p_3():
     scheduler.add(current + 1, task, 2)
     scheduler.run()
 
+def test_p_4():
+    scheduler = Scheduler()
+    current = time()
+    
+    # Dynamic intervals
+    def dynamic_task():
+        print("First execution - wait 2 seconds")
+        yield 2
+        print("Second execution - wait 1 second")
+        yield 1
+        print("Last execution")
+        yield
+    
+    # Fixed frequency
+    def fixed_task():
+        for i in range(3):
+            print(f"Fixed task execution #{i + 1}")
+            yield
+    
+    scheduler.add(current + 1, dynamic_task())
+    scheduler.add(current + 2, fixed_task(), 2)
+    scheduler.run()
+
 def main():
 #    test_p_2()
-    test_p_3()
+    test_p_4()
 
 
 if __name__ == "__main__":
