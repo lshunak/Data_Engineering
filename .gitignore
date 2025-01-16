@@ -47,7 +47,7 @@ pylint-report.txt
 pylint-output.txt
 
 # datasets
-.csv
+*.csv
 
 # Environments
 .env
