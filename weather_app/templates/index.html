@@ -33,7 +33,7 @@
             {% for day in forecast %}
             <tr>
                 <td>{{ datetime.fromtimestamp(day.dt).strftime('%A, %d %b %Y') }}</td>
-                <td>Day: {{ day.temp.day }}°C, Night: {{ day.temp.night }}°C</td>
+                <td>Day: {{ day.main.temp }}°C</td>
                 <td>{{ day.humidity }}%</td>
             </tr>
             {% endfor %}
