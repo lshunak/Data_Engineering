@@ -1,30 +1,36 @@
 services:
-  web:
+  weather-app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: weather_app
     ports:
-      - "9000:5000"  # Expose port 5000 from the container to port 9000 on the host
+      - "9000-9001:9000"  # Expose ports 9000 and 9001
     environment:
-      - PORT=5000
-    volumes:
-      - .:/app  # Mount the current directory to /app inside the container
+      FLASK_ENV: development
+      API_KEY: ${API_KEY}
+      DB_HOST: db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      PORT: 9000
     depends_on:
-      - db  # Ensure db service starts before the web service
+      - db
+    scale: 2
+      
 
   db:
-    image: mysql:5.7  # Use MySQL 5.7 image
-    container_name: weather_db
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass  # MySQL root password
-      MYSQL_USER: weather_user  # Custom MySQL user
-      MYSQL_PASSWORD: weatherpass  # Custom password for the user
-      MYSQL_DATABASE: weather_history  # Name of the database
+    image: mysql:8.0
+    container_name: weather-history
+    restart: always
     ports:
-      - "3306:3306"  # Expose port 3306 to host machine (MySQL default)
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - db_data:/var/lib/mysql  # Persist database data across container restarts
+      - db_data:/var/lib/mysql
 
 volumes:
   db_data:

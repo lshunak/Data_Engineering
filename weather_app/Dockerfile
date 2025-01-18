@@ -1,3 +1,4 @@
+# Dockerfile
 # Use the official Python base image
 FROM python:3.10-slim
 
@@ -13,8 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code
 COPY . .
 
-# Expose the Flask port
-EXPOSE 5000
+# Expose the Flask port for the container
+EXPOSE 9000
 
 # Run the Flask application
 CMD ["python", "weather_app.py"]
