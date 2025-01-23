@@ -30,7 +30,7 @@ class TestFetcherWithDocker(unittest.TestCase):
         self.metadata_repo.collection.delete_many({})
 
     def test_fetcher_saves_metadata(self):
-        test_url = "https://en.wikipedia.org/wiki/Python_(programming_language)"
+        test_url = "https://en.wikipedia.org/wiki/Main_Page"
         self.fetcher.fetch(test_url)
         
         # Verify metadata was saved

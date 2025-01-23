@@ -1,0 +1,95 @@
+
+services:
+  fetcher:
+    build:
+      context: ./src
+      dockerfile: fetcher/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongo_db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - MONGO_URI=mongodb://root:example@mongo_db:27017
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+    volumes:
+      - ./data/html:/app/html_storage
+
+  parser:
+    build: 
+      context: ./src
+      dockerfile: parser/Dockerfile
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+
+  filter:
+    build: 
+      context: ./src
+      dockerfile: filter/Dockerfile
+    depends_on:
+      - rabbitmq
+      - redis
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+
+  mongo_db:
+    user: "${UID}:${GID}"
+    image: mongo:latest
+    volumes:
+      - ./data/db:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
