@@ -20,4 +20,4 @@ COPY filter .
 
 
 # Command to run the application
-CMD ["python", "-m", "filter.py"]
+CMD ["python", "filter.py"]

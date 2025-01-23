@@ -2,6 +2,7 @@ import pika
 import json
 from typing import Callable, Any
 import logging
+import time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -13,25 +14,46 @@ class QueueClient:
         self._connect()
         
     def _connect(self) -> None:
+        retries = 5
+        delay = 5
+
+        for attempt in range(retries):
+            try:
+                logger.info(f"Connecting to RabbitMQ at {self.host}")
+                self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host, connection_attempts=3, retry_delay=delay))
+                self.channel = self.connection.channel()
+                logger.info("Connected to RabbitMQ")
+            except Exception as e:
+                if attempt < retries - 1:  # Don't sleep on the last attempt
+                    logger.warning(f"Failed to connect to RabbitMQ (attempt {attempt + 1}/{retries}): {e}")
+                    time.sleep(delay)
+                else:
+                    logger.error(f"Error connecting to RabbitMQ: {e}")
+                    raise
+
+    def declare_queue(self, queue: str) -> None:
         try:
-            logger.info(f"Connecting to RabbitMQ at {self.host}")
-            self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host))
-            self.channel = self.connection.channel()
-            logger.info("Connected to RabbitMQ")
+            logger.info(f"Declaring queue: {queue}")
+            self.channel.queue_declare(queue=queue, durable=True)
+            logger.info(f"Declared queue: {queue}")
         except Exception as e:
-            logger.error(f"Error connecting to RabbitMQ: {e}")
+            logger.error(f"Error declaring queue: {e}")
             raise
-        
+
     def publish(self, queue: str, message: Any) -> None:
         try:
-            self.channel.queue_declare(queue=queue, durable=True)  # Ensure queue exists before publishing
+            self.declare_queue(queue)
             logger.info(f"Declared queue: {queue}")
             
             if not self.channel.is_open:
-                raise Exception("Channel is not open.")
-            
-            message = json.dumps(message)
-            self.channel.basic_publish(exchange='', routing_key=queue, body=message, properties=pika.BasicProperties(delivery_mode=2 ))
+                raise Exception("Channel is closed")
+
+            if isinstance(message, str):
+                message_body = message
+            else:
+                message_body = json.dumps(message)
+
+            self.channel.basic_publish(exchange='', routing_key=queue, body=message_body, properties=pika.BasicProperties(delivery_mode=2 ))
             logger.info(f"Published message to {queue}")
         except Exception as e:
             logger.error(f"Error publishing message: {e}")
@@ -44,10 +66,13 @@ class QueueClient:
             
             def wrapped_callback(ch, method, properties, body):
                 try:
-                    decoded_body = json.loads(body)
+                    # Try to decode as JSON first (for lists/dicts)
+                    try:
+                        decoded_body = json.loads(body)
+                    except json.JSONDecodeError:
+                    # If JSON fails, treat as plain string
+                        decoded_body = body.decode('utf-8').strip('"')
                     callback(decoded_body)
-                except json.JSONDecodeError:
-                    logger.error(f"Failed to decode message body: {body}")
                 except Exception as e:
                     logger.error(f"Error in callback: {str(e)}")
             

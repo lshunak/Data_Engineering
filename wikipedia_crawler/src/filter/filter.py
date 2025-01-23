@@ -24,12 +24,15 @@ class Filter:
     def start(self):
         """Start the Filter to consume links."""
         logging.info("Filter started.")
+
+        self.queue_client.declare_queue('filter_queue')
+        self.queue_client.declare_queue('fetcher_queue')
         self.queue_client.consume('filter_queue', self.on_message)
 
     def on_message(self, body):
         """Process the incoming links."""
         logging.info("Received links for filtering.")
-        links = body.split(',')  # Simplified for demonstration
+        links = body
         new_links = self.filter_links(links)
         if new_links:
             logging.info(f"Publishing {len(new_links)} new links to fetcher_queue.")
@@ -51,6 +54,6 @@ def main():
     except Exception as e:
         logger.error(f"Error starting Filter: {e}")
         raise
-    
+
 if __name__ == "__main__":
     main()

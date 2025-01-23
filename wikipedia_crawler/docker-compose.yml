@@ -9,9 +9,8 @@ services:
         condition: service_healthy
       mongo_db:
         condition: service_healthy
-    ports:
-      - "8000:8000"
     environment:
+      - PYTHONPATH=/app
       - RABBITMQ_HOST=rabbitmq
       - MONGO_URI=mongodb://root:example@mongo_db:27017
     healthcheck:
