@@ -10,16 +10,7 @@ class Filter:
         self.queue_client = queue_client
         self.redis_client = redis_client
 
-    def filter_links(self, links):
-        """Check if links have been processed already and add new ones."""
-        new_links = []
-        for link in links:
-            if not self.redis_client.exists(link):
-                new_links.append(link)
-                self.redis_client.set(link, 'processed')
-                # Log which links are being set
-                print(f"Setting link {link} as processed")
-        return new_links
+
 
     def start(self):
         """Start the Filter to consume links."""
@@ -32,12 +23,10 @@ class Filter:
     def on_message(self, body):
         """Process the incoming links."""
         logging.info("Received links for filtering.")
-        links = body
-        new_links = self.filter_links(links)
-        if new_links:
-            logging.info(f"Publishing {len(new_links)} new links to fetcher_queue.")
-            for link in new_links:
-                self.queue_client.publish('fetcher_queue', link)
+        link = body
+        if not self.redis_client.exists(link):     
+            self.redis_client.set(link, 'processed')
+            self.queue_client.publish('fetcher_queue', link)
         else:
             logging.info("No new links to publish.")
 

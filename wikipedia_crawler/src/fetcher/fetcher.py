@@ -30,6 +30,7 @@ class Fetcher:
 
             if links:
                 logger.info(f"Publishing {len(links)} links to parser_queue")
+                logger.debug(f"Sample of links: {links[:5]}")
                 json_links = json.dumps(links)
                 self.queue_client.publish('parser_queue', json_links)
             else:

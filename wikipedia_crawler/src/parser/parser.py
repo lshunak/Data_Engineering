@@ -7,8 +7,16 @@ from queue_service.queue_client import QueueClient
 class Parser:
     def __init__(self, queue_client: QueueClient):
         self.queue_client = queue_client
+    
+    @staticmethod
+    def is_wikipedia_url(url: str) -> bool:
+        """
+        Check if the URL is a valid Wikipedia link.
+        """
+        wikipedia_regex = re.compile(r'https?://(?:[a-z]{2,3}\.)?wikipedia\.org/wiki/.*')
+        return bool(wikipedia_regex.match(url))
 
-    def filter_wikipedia_links(self, urls):
+    def filter_wikipedia_links(self, urls: list) -> list:
         """Filter and validate Wikipedia links"""
         if not urls:
             logger.warning(f"Received empty URLs: {urls}")
@@ -18,6 +26,7 @@ class Parser:
         wikipedia_links = []
         for link in urls:
             if not isinstance(link, str):
+                logger.debug(f"Skipping non-string URL: {link}")
                 continue
                 
             # Clean the link
@@ -28,8 +37,7 @@ class Parser:
                 link = f"https://en.wikipedia.org{link}"
             
             # Check if it's a valid Wikipedia article link
-            if (link.startswith('https://en.wikipedia.org/wiki/') and
-                not any(x in link for x in [':', 'Special:', 'File:', 'Help:', 'Wikipedia:', '#', 'Main_Page'])):
+            if self.is_wikipedia_url(link):
                 wikipedia_links.append(link)
                 logger.debug(f"Valid Wikipedia link found: {link}")
             else:
@@ -49,19 +57,24 @@ class Parser:
         """Process the incoming URLs"""
         try:
             logger.info(f"Received message of type: {type(body)}")
-            
+            logger.debug(f"Raw message content: {body[:200] if isinstance(body, (str, bytes)) else str(body)[:200]}...")  # Log start of message
+    
             # Handle different input types
             if isinstance(body, bytes):
                 decoded_body = body.decode('utf-8')
+                logger.debug(f"Decoded from bytes: {decoded_body[:200]}...")
             else:
                 decoded_body = body
+                logger.debug(f"Body directly: {decoded_body[:200]}...")
 
             # Parse URLs from the message
             try:
                 if isinstance(decoded_body, str):
                     urls = json.loads(decoded_body)
+                    logger.debug(f"Decoded JSON: {urls[:5]}...")
                 else:
                     urls = decoded_body
+                    logger.info(f"Body is not a string, assuming it's a list")
             except json.JSONDecodeError as e:
                 logger.error(f"Failed to parse JSON: {e}")
                 urls = [decoded_body] if isinstance(decoded_body, str) else []
@@ -84,13 +97,16 @@ class Parser:
                 
         except Exception as e:
             logger.error(f"Error processing message: {e}", exc_info=True)
-            # Don't raise the exception to keep the consumer running
+            logger.debug(f"Sample of URLs that were filtered out: {urls[:5]}")
 
+# Set the root logger to DEBUG level.
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,  # Set the logging level to DEBUG
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+# Explicitly set the logger level to DEBUG
+logger.setLevel(logging.DEBUG)
 
 def main():
     try:
