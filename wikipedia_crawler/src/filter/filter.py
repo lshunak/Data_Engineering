@@ -4,7 +4,7 @@ import os
 import redis
 # Set up logging
 logging.basicConfig(level=logging.INFO)
-
+logger = logging.getLogger(__name__)
 class Filter:
     def __init__(self, queue_client: QueueClient, redis_client):
         self.queue_client = queue_client
@@ -39,10 +39,18 @@ class Filter:
             logging.info("No new links to publish.")
 
 def main():
-    queue_client = QueueClient(host=os.getenv('RABBITMQ_HOST', 'localhost'))
-    redis_client = redis.Redis(host=os.getenv('REDIS_HOST', 'localhost'), port=6379)
-    filter_service = Filter(queue_client, redis_client)
-    filter_service.start()
-
+    try:
+        queue_client = QueueClient(host=os.getenv('RABBITMQ_HOST', 'localhost'))
+        redis_client = redis.Redis(
+            host=os.getenv('REDIS_HOST', 'localhost'),
+            port=int(os.getenv('REDIS_PORT', 6379))
+        )
+        filter_service = Filter(queue_client, redis_client)
+        logger.info("Starting Filter...")
+        filter_service.start()
+    except Exception as e:
+        logger.error(f"Error starting Filter: {e}")
+        raise
+    
 if __name__ == "__main__":
     main()

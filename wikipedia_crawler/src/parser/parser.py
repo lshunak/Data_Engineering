@@ -1,5 +1,6 @@
 import re
 import os
+import logging
 from queue_service.queue_client import QueueClient
 
 class Parser:
@@ -30,10 +31,18 @@ class Parser:
         else:
             print("No links to publish.")
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 def main():
-    queue_client = QueueClient(host=os.getenv('RABBITMQ_HOST', 'localhost'))
-    parser = Parser(queue_client)
-    parser.start()
+    try:
+        queue_client = QueueClient(host=os.getenv('RABBITMQ_HOST', 'localhost'))
+        parser = Parser(queue_client)
+        logger.info("Starting Parser...")
+        parser.start()
+    except Exception as e:
+        logger.error(f"Error starting Parser: {e}")
+        raise
 
 if __name__ == "__main__":
     main()

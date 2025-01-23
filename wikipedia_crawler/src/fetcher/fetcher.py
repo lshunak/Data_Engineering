@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from storage.html_storage import HTMLStorage
 from storage.metadata_db import MetadataRepository
 import os
+import logging
 
 class Fetcher:
     def __init__(self, queue_client: QueueClient, storage=HTMLStorage, metadata_repo=MetadataRepository):
@@ -54,14 +55,21 @@ class Fetcher:
         print(f"Processing URL: {url}")
         self.fetch(url)
 
-def main():
-    queue_client = QueueClient(host=os.getenv('RABBITMQ_HOST', 'localhost'))
-    storage = HTMLStorage(base_path='/app/html_storage')
-    metadata_repo = MetadataRepository(
-        mongo_uri=os.getenv('MONGO_URI', 'mongodb://root:example@localhost:27017')
-    )
-    fetcher = Fetcher(queue_client, storage, metadata_repo)
-    fetcher.start()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+def main():
+    try:
+        queue_client = QueueClient(host=os.getenv('RABBITMQ_HOST', 'localhost'))
+        storage = HTMLStorage(base_path='/app/html_storage')
+        metadata_repo = MetadataRepository(
+            mongo_uri=os.getenv('MONGO_URI', 'mongodb://root:example@localhost:27017')
+        )
+        fetcher = Fetcher(queue_client, storage, metadata_repo)
+        logger.info("Fetcher starting...")
+        fetcher.start()
+    except Exception as e:
+        logger.error(f"Error starting Fetcher: {e}")
+        raise
 if __name__ == "__main__":
     main()

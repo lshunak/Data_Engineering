@@ -78,7 +78,6 @@ services:
       timeout: 10s
 
   mongo_db:
-    user: "${UID}:${GID}"
     image: mongo:latest
     volumes:
       - ./data/db:/data/db
@@ -93,3 +92,19 @@ services:
       retries: 3
       start_period: 10s
       timeout: 10s
+  
+  seeder:
+    build:
+      context: ./src
+      dockerfile: seeder/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    # This makes the container remove itself after finishing
+    restart: "no"
+    # This removes the container after it exits
+    command: >
+      sh -c "python -m seeder.seeder && exit"
