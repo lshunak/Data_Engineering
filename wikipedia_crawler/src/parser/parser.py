@@ -9,19 +9,36 @@ class Parser:
         self.queue_client = queue_client
     
     @staticmethod
+
     def is_wikipedia_url(url: str) -> bool:
         """
-        Check if the URL is a valid Wikipedia link.
+        Check if the URL is a valid English Wikipedia article link.
         """
-        wikipedia_regex = re.compile(r'https?://(?:[a-z]{2,3}\.)?wikipedia\.org/wiki/.*')
-        return bool(wikipedia_regex.match(url))
+        wikipedia_regex = re.compile(
+            r'https?://en\.wikipedia\.org/wiki/[^:]*$'
+        )
+
+        file_extension_regex = re.compile(r'\.(jpg|jpeg|png|gif|svg|pdf|txt|mp3|mp4|avi|mov|ogg|wav|zip|tar|gz|rar)$', re.IGNORECASE)
+
+        # Check if URL matches the Wikipedia article pattern
+        if not wikipedia_regex.match(url):
+            return False
+
+        # Check if URL ends with a file extension that indicates non-article content
+        if file_extension_regex.search(url):
+            return False
+
+        return True
+
+
 
     def filter_wikipedia_links(self, urls: list) -> list:
         """Filter and validate Wikipedia links"""
         if not urls:
             logger.warning(f"Received empty URLs: {urls}")
             return []
-        
+
+
         # Filter only Wikipedia links
         wikipedia_links = []
         for link in urls:

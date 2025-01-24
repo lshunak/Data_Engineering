@@ -50,9 +50,6 @@ class QueueClient:
             elif not isinstance(message, str):
                 message = str(message)
 
-            self.declare_queue(queue)
-            logger.info(f"Declared queue: {queue}")
-            
             if not self.channel.is_open:
                 raise Exception("Channel is closed")
 
@@ -69,9 +66,6 @@ class QueueClient:
         
     def consume(self, queue: str, callback: Callable) -> None:
         try:
-            self.channel.queue_declare(queue=queue, durable=True)
-            logger.info(f"Declared queue: {queue}")
-            
             def wrapped_callback(ch, method, properties, body):
                 try:
                     decoded_body = json.loads(body)
