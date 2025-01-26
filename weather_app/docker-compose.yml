@@ -15,9 +15,8 @@ services:
       PORT: 9000
     depends_on:
       - db
-    scale: 2
+    #scale: 2
       
-
   db:
     image: mysql:8.0
     container_name: weather-history
@@ -31,6 +30,8 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
+      - ./mysql-conf/my.cnf:/etc/mysql/conf.d/my.cnf  # Mount custom config
+
 
 volumes:
   db_data:
