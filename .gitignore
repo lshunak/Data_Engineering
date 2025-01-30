@@ -41,3 +41,7 @@ ENV/
 
 # Logs
 *.log
+# Redis
+*.rdb
+dump.rdb
+wikipedia_crawler/data/redis/
