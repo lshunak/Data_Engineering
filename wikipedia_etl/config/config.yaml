@@ -1,0 +1,13 @@
+paths:
+  html_storage: "/home/liran/Documents/data_engineering/wikipedia_etl/tests/data"  # Where your crawler saved the HTML files
+  hdfs_output: "/wikipedia/text_data"   # Where to save processed text in HDFS
+
+mysql:
+  host: "localhost"
+  user: "liran"
+  password: "lir109"
+  database: "wikipedia_metadata"
+
+hdfs:
+  url: "http://localhost:50070"
+  user: "hdfs"
