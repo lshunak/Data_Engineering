@@ -1,0 +1,7 @@
+apache-airflow
+beautifulsoup4
+mysql-connector-python
+hdfs
+pyyaml
+pytest
+requests
