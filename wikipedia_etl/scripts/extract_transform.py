@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def load_config():
     """Load configuration from yaml file."""
     try:
-        with open('config/config.yaml', 'r') as f:
+        with open('/Documents/data_engineering/wikipedia_etl/config/config.yaml', 'r') as f:
             return yaml.safe_load(f)
     except Exception as e:
         logger.error(f"Error loading config: {e}")

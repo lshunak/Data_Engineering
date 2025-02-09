@@ -1,12 +1,18 @@
 paths:
-  html_storage: "/home/liran/Documents/data_engineering/wikipedia_etl/tests/data"  # Where your crawler saved the HTML files
+  # Update this to absolute path
+  html_storage: "/home/liran/Documents/data_engineering/wikipedia_etl/tests/data"
+  processed_data: "/home/liran/Documents/data_engineering/wikipedia_etl/processed_data"
 
 mysql:
   host: "localhost"
-  user: "liran"
-  password: "lir109"
+  user: "root"  # Updated to match your Airflow connection
+  password: "lir109"  # Updated to match your Airflow connection
   database: "wikipedia_metadata"
 
 hdfs:
-  url: "http://localhost:50070"
+  url: "http://localhost:9870"  # Updated to Hadoop 3.x port
   user: "lshunak"
+
+# Add base directory for Airflow
+airflow:
+  base_dir: "/home/liran/Documents/data_engineering/wikipedia_etl"
