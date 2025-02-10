@@ -1,7 +1,7 @@
 paths:
   # Update this to absolute path
-  html_storage: "/home/liran/Documents/data_engineering/wikipedia_etl/tests/data"
-  processed_data: "/home/liran/Documents/data_engineering/wikipedia_etl/processed_data"
+  html_storage: "~/home/liran/Documents/data_engineering/wikipedia_etl/tests/data"
+  processed_data: "~/home/liran/Documents/data_engineering/wikipedia_etl/processed_data"
 
 mysql:
   host: "localhost"
