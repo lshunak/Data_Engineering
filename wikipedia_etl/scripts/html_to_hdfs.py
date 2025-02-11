@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import lit
-
+from datetime import datetime
 import logging
 import os
 from typing import List, Optional
@@ -121,7 +121,7 @@ class HTMLProcessor:
         # Clean up local temp directory
         os.system("rm -rf /tmp/wiki_merge")
 
-def main(execution_date: Optional[now] = None) -> None:
+def main(execution_date: Optional[datetime] = None) -> None:
     # Configuration
     INPUT_DIR = "/home/liran/Documents/data_engineering/wikipedia_etl/tests/data"
     HDFS_BASE = "hdfs://localhost:9000/user/lshunak/wikipedia"
