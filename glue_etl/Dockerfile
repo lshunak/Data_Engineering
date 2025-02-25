@@ -7,7 +7,7 @@ WORKDIR /home/glue_user/workspace
 COPY scripts/ /home/glue_user/workspace/
 
 # Set environment variables
-ENV AWS_REGION=us-east-1
+ENV AWS_REGION=eu-north-1
 ENV PYTHONPATH=/home/glue_user/workspace
 
 # Default command to run the Spark job
