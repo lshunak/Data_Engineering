@@ -1,0 +1,12 @@
+#!/bin/bash
+export REDSHIFT_HOST="default-workgroup.536697231782.eu-north-1.redshift-serverless.amazonaws.com"
+export REDSHIFT_DB="dev"
+export REDSHIFT_USER="admin"
+export REDSHIFT_PASSWORD="Admin123"
+export REDSHIFT_PORT="5439"
+export REDSHIFT_IAM_ROLE="arn:aws:iam::536697231782:role/RedshiftLoadRole"
+export S3_BUCKET="lshunak-airflow-dags"
+export REDSHIFT_SCHEMA="music_analytics"
+export REDSHIFT_CONNECT_TIMEOUT="10"
+export REDSHIFT_KEEPALIVES="1"
+export REDSHIFT_KEEPALIVES_IDLE="30"
